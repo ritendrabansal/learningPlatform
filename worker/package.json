@@ -4,13 +4,15 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tests/tsconfig.json",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "hono": "^4",
     "agents": "^0",
     "ncert-core": "*",
+    "drizzle-orm": "^0.45",
     "@modelcontextprotocol/client": "2.0.0",
     "@modelcontextprotocol/sdk": "1.30.0",
     "@modelcontextprotocol/server": "2.0.0"
@@ -19,6 +21,7 @@
     "typescript": "^5",
     "wrangler": "^4",
     "vitest": "^4.1",
-    "@cloudflare/vitest-plugin": "^1.2"
+    "@cloudflare/vitest-plugin": "^1.2",
+    "drizzle-kit": "^0.31"
   }
 }
