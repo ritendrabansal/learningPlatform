@@ -13,6 +13,7 @@
     "agents": "^0",
     "ncert-core": "*",
     "drizzle-orm": "^0.45",
+    "jose": "^6.2.12",
     "@modelcontextprotocol/client": "2.0.0",
     "@modelcontextprotocol/sdk": "1.30.0",
     "@modelcontextprotocol/server": "2.0.0"

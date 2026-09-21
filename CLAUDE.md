@@ -22,7 +22,7 @@ Read `IMPLEMENTATION_PLAN.md` before doing anything. Track progress in `docs/PRO
 - `npm run dev`: wrangler dev (worker + web assets, local D1/R2/DO)
 - `npm run digest -- --book <pdf> [--chapters 1,2] [--passes P1,P2]`
 - `npm run db:migrate:local` / `npm run db:seed:local`
-- `npm test`: Vitest (worker tests run in `@cloudflare/vitest-pool-workers`)
+- `npm test`: Vitest (worker tests run in `@cloudflare/vitest-pool-workers`; digest tests run in plain Node, mocking `@anthropic-ai/sdk` — never the real API)
 - `npm run typecheck`
 
 ## Working style

@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { getDb } from '../db/client.js'
 import { getHomeworkForStudent, getHomeworkItem, recordHomeworkSubmission } from '../db/queries/homework.js'
+import { checkRateLimit } from '../lib/rateLimit.js'
 import { scoreAnswerLocally, scoreAnswerWithAi } from '../lib/scoreAnswer.js'
 
 export const homework = new Hono<{ Bindings: Env }>()
@@ -14,6 +15,8 @@ homework.post('/items/:itemId/submit', async (c) => {
   const db = getDb(c.env)
   const itemId = c.req.param('itemId')
   const { response } = await c.req.json<{ response: string }>()
+
+  if (!(await checkRateLimit(c.env, itemId))) return c.json({ error: 'rate limited' }, 429)
 
   const found = await getHomeworkItem(db, itemId)
   if (!found?.question) return c.json({ error: 'not found' }, 404)

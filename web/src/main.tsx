@@ -10,6 +10,7 @@ import { TeachMode } from './pages/TeachMode.js'
 import { StudentView } from './pages/StudentView.js'
 import { Progress } from './pages/Progress.js'
 import { Homework } from './pages/Homework.js'
+import { AdminCosts } from './pages/AdminCosts.js'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -24,6 +25,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="join" element={<StudentView />} />
           <Route path="progress" element={<Progress />} />
           <Route path="homework" element={<Homework />} />
+          <Route path="admin/costs" element={<AdminCosts />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { getDb } from '../db/client.js'
 import { getProgressGrid, getStudentTopicSummary } from '../db/queries/progress.js'
 import { getStudent } from '../db/queries/people.js'
+import { checkRateLimit } from '../lib/rateLimit.js'
 import { summarizeProgress } from '../ai/summarizeProgress.js'
 
 export const progress = new Hono<{ Bindings: Env }>()
@@ -14,6 +15,8 @@ progress.get('/classes/:classId', async (c) => {
 progress.get('/students/:studentId/summary', async (c) => {
   const db = getDb(c.env)
   const studentId = c.req.param('studentId')
+  if (!(await checkRateLimit(c.env, studentId))) return c.json({ error: 'rate limited' }, 429)
+
   const [student, topics] = await Promise.all([getStudent(db, studentId), getStudentTopicSummary(db, studentId)])
   if (!student) return c.json({ error: 'not found' }, 404)
   if (topics.length === 0) return c.json({ summary: `${student.name} has no recorded attempts yet.` })

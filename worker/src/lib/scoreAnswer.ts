@@ -1,18 +1,16 @@
-import { MODELS } from 'ncert-core'
+import { MODELS, scoreResultSchema, type ScoreResult } from 'ncert-core'
 import { logAiRun } from '../db/queries/audit.js'
 import type { Db } from '../db/client.js'
+// CLAUDE.md hard rule 5: prompts are versioned files, not inline strings. Workers' bundler
+// supports .txt as a raw-string import by default (unlike .md, which needs a custom bundling
+// rule) — developers.cloudflare.com/workers/wrangler/bundling/.
+import systemPrompt from '../prompts/v1/score-answer.txt'
 
 // Calls the Anthropic Messages API directly via fetch rather than @anthropic-ai/sdk — Worker
 // code is Workers-runtime only (CLAUDE.md hard rule 6: no node-specific assumptions), and a
 // plain fetch call needs no SDK-compat verification. Version header confirmed against the
 // installed @anthropic-ai/sdk's own client (node_modules/@anthropic-ai/sdk/client.mjs), not
 // guessed. Short/long answers only — mcq/numeric are scored without AI (scoreAnswerLocally).
-
-interface ScoreResult {
-  correct: boolean
-  score: number
-  feedback: string
-}
 
 const inputSchema = {
   type: 'object',
@@ -40,9 +38,7 @@ export async function scoreAnswerWithAi(
     body: JSON.stringify({
       model: MODELS.CLASSIFY,
       max_tokens: 512,
-      system:
-        'You grade a Class 9 student\'s answer against a model answer for a live classroom quiz. ' +
-        'Be encouraging but honest; partial credit is fine for a partially correct answer.',
+      system: systemPrompt,
       messages: [
         {
           role: 'user',
@@ -67,6 +63,9 @@ export async function scoreAnswerWithAi(
   const toolUse = data.content.find((block) => block.type === 'tool_use' && block.name === 'record_score')
   if (!toolUse) throw new Error('scoreAnswerWithAi: model did not call record_score')
 
+  // CLAUDE.md hard rule 2: every AI response is Zod-validated before use — strict tool use
+  // narrows the shape but doesn't replace validating it.
+  const parsed = scoreResultSchema.safeParse(toolUse.input)
   await logAiRun(db, {
     purpose: 'ClassroomAgent answer scoring',
     model: MODELS.CLASSIFY,
@@ -74,10 +73,12 @@ export async function scoreAnswerWithAi(
     inputTokens: data.usage.input_tokens,
     outputTokens: data.usage.output_tokens,
     costUsd: 0, // Negligible per-call cost for Haiku classification; not worth the pricing import here.
-    ok: true,
+    ok: parsed.success,
+    error: parsed.success ? undefined : `schema validation failed: ${parsed.error.message}`,
   })
+  if (!parsed.success) throw new Error(`scoreAnswerWithAi: invalid response shape: ${parsed.error.message}`)
 
-  return toolUse.input as ScoreResult
+  return parsed.data
 }
 
 /** mcq/numeric: normalized comparison against the stored answer, no AI call. */

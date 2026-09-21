@@ -35,6 +35,7 @@ function App() {
         <NavLink to="/join">Join Class</NavLink>
         <NavLink to="/progress">Progress</NavLink>
         <NavLink to="/homework">Homework</NavLink>
+        <NavLink to="/admin/costs">AI Costs</NavLink>
       </nav>
       <main>
         <Outlet />

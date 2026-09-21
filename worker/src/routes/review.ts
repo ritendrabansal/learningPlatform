@@ -13,6 +13,7 @@ import {
   rejectTopic,
   resolveFlag,
 } from '../db/queries/review.js'
+import { requireAccess } from '../middleware/requireAccess.js'
 
 export const review = new Hono<{ Bindings: Env }>()
 
@@ -29,7 +30,7 @@ review.get('/chapters/:id', async (c) => {
   return c.json({ ...detail, flags })
 })
 
-review.post('/chapters/:id/approve', async (c) => {
+review.post('/chapters/:id/approve', requireAccess, async (c) => {
   const chapter = await approveChapter(getDb(c.env), c.req.param('id'))
   return c.json(chapter)
 })
@@ -41,7 +42,7 @@ interface TopicAction {
   contentMd?: string
 }
 
-review.patch('/topics/:id', async (c) => {
+review.patch('/topics/:id', requireAccess, async (c) => {
   const db = getDb(c.env)
   const id = c.req.param('id')
   const body = await c.req.json<TopicAction>()
@@ -65,7 +66,7 @@ interface QuestionAction {
   difficulty?: string | null
 }
 
-review.patch('/questions/:id', async (c) => {
+review.patch('/questions/:id', requireAccess, async (c) => {
   const db = getDb(c.env)
   const id = c.req.param('id')
   const body = await c.req.json<QuestionAction>()
@@ -84,7 +85,7 @@ review.patch('/questions/:id', async (c) => {
 
 // For flags on items with no reviewable status column of their own (worked_examples), or as a
 // manual override: resolve the flag directly without touching curriculum tables.
-review.patch('/flags/:id', async (c) => {
+review.patch('/flags/:id', requireAccess, async (c) => {
   const flag = await resolveFlag(getDb(c.env), c.req.param('id'))
   return c.json(flag)
 })

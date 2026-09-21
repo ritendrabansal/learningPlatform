@@ -6,9 +6,15 @@
 // augmenting only one would make them diverge and break assignability between them.
 interface Env {
   ANTHROPIC_API_KEY: string
+  // Both unset until Cloudflare Access is configured in the dashboard (a live account action
+  // this environment can't perform) — requireAccess.ts middleware treats that as "no auth yet."
+  CF_ACCESS_TEAM_DOMAIN?: string
+  CF_ACCESS_AUD?: string
 }
 declare namespace Cloudflare {
   interface Env {
     ANTHROPIC_API_KEY: string
+    CF_ACCESS_TEAM_DOMAIN?: string
+    CF_ACCESS_AUD?: string
   }
 }

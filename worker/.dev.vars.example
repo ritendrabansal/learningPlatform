@@ -1,1 +1,7 @@
 ANTHROPIC_API_KEY=
+
+# Optional — leave unset until you've created a Cloudflare Access application for the teacher
+# routes. Both must be set for requireAccess.ts to actually enforce anything; until then it's a
+# no-op, which is today's real state.
+# CF_ACCESS_TEAM_DOMAIN=your-team-name.cloudflareaccess.com
+# CF_ACCESS_AUD=

@@ -17,6 +17,16 @@
       "bucket_name": "ncert-pdfs"
     }
   ],
+  "ratelimits": [
+    {
+      "name": "AI_RATE_LIMITER",
+      "namespace_id": "1",
+      // Per-key cap on the routes/messages that trigger an AI call from student/teacher input
+      // (classroom answers, homework submissions, progress summaries) — a conservative default,
+      // tune once real usage patterns are known.
+      "simple": { "limit": 5, "period": 60 }
+    }
+  ],
   "durable_objects": {
     "bindings": [
       { "name": "CLASSROOM_AGENT", "class_name": "ClassroomAgent" },

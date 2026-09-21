@@ -51,5 +51,33 @@
   plain "no attempts yet" message). A real bug in weak-topic detection was also caught and fixed
   by the unit tests: a topic with solid prior mastery but no attempt *this session* was wrongly
   flagged as weak.
-- [ ] Phase 8 — Hardening
+- [x] Phase 8 — Hardening
+  Cloudflare Access JWT verification (`worker/src/middleware/requireAccess.ts`, `jose`) guards
+  the teacher-only mutation routes (start session, all Review Queue writes, `/api/admin`); it's a
+  no-op until `CF_ACCESS_TEAM_DOMAIN`/`CF_ACCESS_AUD` are set, since no Access application exists
+  yet — that's a live Cloudflare account action only Ritendra can do (same as Phase 9's deploy).
+  Workers Rate Limiting binding (`AI_RATE_LIMITER`, 5/60s) guards every point that turns
+  student/teacher input into an AI call. New `ai_runs` cost view (`/api/admin/ai-runs/*`,
+  `AdminCosts` page). Added `digest/`'s first Vitest setup (mocking `@anthropic-ai/sdk`, never
+  the real API) plus a curriculum-write-boundary guard test.
+
+  Self-review against `code-reviewer.md`'s checklist (no such subagent is dispatchable in this
+  environment, so done directly) caught three real gaps, all fixed rather than just reported:
+  1. **Security:** the WebSocket path into `ClassroomAgent` bypasses the Hono app entirely
+     (`routeAgentRequest` handles it first), so `requireAccess` never covered a connection
+     claiming `role=teacher` — anyone who learned a session id could hijack a live class
+     regardless of Access being configured. Fixed by verifying the same Access token directly in
+     `ClassroomAgent.onConnect`.
+  2. **Hard rule 2:** `scoreAnswerWithAi` and `generatePracticeQuestion` cast the AI's tool output
+     directly instead of Zod-validating it (a `practiceQuestionSchema` already existed and simply
+     wasn't being used). Both now validate and log failures to `ai_runs`.
+  3. **Hard rule 5:** the three new runtime AI prompts were inline strings, not versioned files.
+     Extracted to `worker/src/prompts/v1/*.txt` (`.txt`, not `.md`, since Wrangler's bundler only
+     text-imports `.txt`/`.html`/`.sql` by default).
+  4. Also hardened `ClassroomAgent`'s student side: a connection could previously claim any
+     `studentId` via the query string with no check that it's enrolled in the class.
+
+  `/verify-cf` run manually (no slash-command tool here): typecheck, full test suite (27 tests),
+  migrations all applied, no Node-only imports in `worker/`/`packages/core/`, and
+  `wrangler deploy --dry-run` all pass.
 - [ ] Phase 9 — Deploy (run by Ritendra manually)

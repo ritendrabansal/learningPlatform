@@ -20,6 +20,12 @@ export const studentMessageSchema = z.discriminatedUnion('type', [
 export type TeacherMessage = z.infer<typeof teacherMessageSchema>
 export type StudentMessage = z.infer<typeof studentMessageSchema>
 
+// scoreAnswerWithAi's (worker/src/lib/scoreAnswer.ts) output contract — CLAUDE.md hard rule 2:
+// every AI response is Zod-validated before use, strict tool use narrows the shape but doesn't
+// replace validating it.
+export const scoreResultSchema = z.object({ correct: z.boolean(), score: z.number(), feedback: z.string() })
+export type ScoreResult = z.infer<typeof scoreResultSchema>
+
 // Sent privately (connection.send, never broadcast) to the student who submitted an answer —
 // other students only ever see the aggregate answeredCount in shared state.
 export interface AnswerResult {

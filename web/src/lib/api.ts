@@ -172,6 +172,27 @@ export interface ProgressCell {
   attempts: number
 }
 
+export interface AiRunsSummaryRow {
+  purpose: string
+  model: string
+  count: number
+  totalCostUsd: number
+  okCount: number
+}
+
+export interface AiRun {
+  id: string
+  purpose: string
+  model: string
+  promptVersion: string
+  inputTokens: number
+  outputTokens: number
+  costUsd: number
+  createdAt: number
+  ok: boolean
+  error: string | null
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     ...init,
@@ -219,4 +240,7 @@ export const api = {
 
   getProgressGrid: (classId: string) => request<ProgressCell[]>(`/api/progress/classes/${classId}`),
   getProgressSummary: (studentId: string) => request<{ summary: string }>(`/api/progress/students/${studentId}/summary`),
+
+  getAiRunsSummary: () => request<AiRunsSummaryRow[]>('/api/admin/ai-runs/summary'),
+  getRecentAiRuns: () => request<AiRun[]>('/api/admin/ai-runs/recent'),
 }

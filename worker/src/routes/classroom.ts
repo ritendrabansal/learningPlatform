@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { getDb } from '../db/client.js'
 import { createSession, getClassByJoinCode, listClasses } from '../db/queries/classroom.js'
+import { requireAccess } from '../middleware/requireAccess.js'
 
 export const classroom = new Hono<{ Bindings: Env }>()
 
@@ -15,7 +16,7 @@ classroom.get('/classes/:joinCode', async (c) => {
   return c.json(result)
 })
 
-classroom.post('/sessions', async (c) => {
+classroom.post('/sessions', requireAccess, async (c) => {
   const body = await c.req.json<{ classId: string; chapterId: string }>()
   const session = await createSession(getDb(c.env), body)
   return c.json(session)

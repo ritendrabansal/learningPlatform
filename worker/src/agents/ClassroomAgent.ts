@@ -4,7 +4,9 @@ import { studentMessageSchema, teacherMessageSchema, type AnswerResult, type Cla
 import { getDb } from '../db/client.js'
 import { textbookQuestions } from '../db/schema/index.js'
 import { endSession, recordAttempt, recordTopicShown, rollUpMastery, setCoverageDuration } from '../db/queries/classroom.js'
-import { listStudentsForClass } from '../db/queries/people.js'
+import { getStudent, listStudentsForClass } from '../db/queries/people.js'
+import { checkRateLimit } from '../lib/rateLimit.js'
+import { verifyAccessToken } from '../middleware/requireAccess.js'
 import { scoreAnswerLocally, scoreAnswerWithAi } from '../lib/scoreAnswer.js'
 import type { HomeworkAgent } from './HomeworkAgent.js'
 
@@ -16,6 +18,9 @@ export type { ClassroomState } from 'ncert-core'
 interface Bookkeeping {
   topicShownAt: number | null
   answeredStudentIds: Set<string>
+  // Roster-membership checks are cached per (already-verified) student id so a chatty student
+  // doesn't cost a D1 lookup on every answer.
+  verifiedStudentIds: Set<string>
 }
 
 export class ClassroomAgent extends Agent<Env, ClassroomState> {
@@ -30,7 +35,7 @@ export class ClassroomAgent extends Agent<Env, ClassroomState> {
     answeredCount: 0,
   }
 
-  private bookkeeping: Bookkeeping = { topicShownAt: null, answeredStudentIds: new Set() }
+  private bookkeeping: Bookkeeping = { topicShownAt: null, answeredStudentIds: new Set(), verifiedStudentIds: new Set() }
 
   getConnectionTags(connection: Connection, context: ConnectionContext): string[] {
     const url = new URL(context.request.url)
@@ -43,7 +48,18 @@ export class ClassroomAgent extends Agent<Env, ClassroomState> {
     return tags
   }
 
-  onConnect(connection: Connection, context: ConnectionContext): void {
+  async onConnect(connection: Connection, context: ConnectionContext): Promise<void> {
+    // A WebSocket upgrade is still a plain HTTP request at connect time, but routeAgentRequest
+    // (worker/src/index.ts) handles it before the Hono app — and therefore requireAccess's
+    // middleware — ever sees it. A connection claiming role=teacher must independently pass the
+    // same Access check the HTTP routes use, or it's closed outright: otherwise anyone who
+    // learns a sessionId could open `?role=teacher` and take over a live class regardless of
+    // Access being configured on the HTTP side.
+    if (connection.tags.includes('teacher') && !(await verifyAccessToken(this.env, context.request))) {
+      connection.close(1008, 'unauthorized')
+      return
+    }
+
     if (connection.tags.includes('student')) {
       this.setState({ ...this.state, connectedStudentCount: this.state.connectedStudentCount + 1 })
     }
@@ -140,6 +156,22 @@ export class ClassroomAgent extends Agent<Env, ClassroomState> {
     if (this.bookkeeping.answeredStudentIds.has(studentId)) return // One answer per question per student.
 
     const db = getDb(this.env)
+
+    // "Simple class code for students" (IMPLEMENTATION_PLAN.md §6 Phase 8) is not real identity,
+    // but a connection's claimed studentId should at least belong to the class this session
+    // actually is — otherwise a crafted connection query string could write attempts under any
+    // student id in the whole database. Checked once per connection, then cached.
+    if (!this.bookkeeping.verifiedStudentIds.has(studentId)) {
+      const student = this.state.classId ? await getStudent(db, studentId) : null
+      if (!student || student.classId !== this.state.classId) {
+        connection.close(1008, 'not enrolled in this class')
+        return
+      }
+      this.bookkeeping.verifiedStudentIds.add(studentId)
+    }
+
+    if (!(await checkRateLimit(this.env, studentId))) return
+
     const [question] =
       message.questionTable === 'textbook_questions'
         ? await db.select().from(textbookQuestions).where(eq(textbookQuestions.id, message.questionId))

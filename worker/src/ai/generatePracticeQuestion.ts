@@ -1,6 +1,7 @@
-import { MODELS, MODEL_PRICING, type PracticeQuestion } from 'ncert-core'
+import { MODELS, MODEL_PRICING, practiceQuestionSchema, type PracticeQuestion } from 'ncert-core'
 import { logAiRun } from '../db/queries/audit.js'
 import type { Db } from '../db/client.js'
+import systemPrompt from '../prompts/v1/generate-practice-question.txt'
 
 // HomeworkAgent's last resort when a weak topic has no unused textbook question and no approved
 // generated_questions left (IMPLEMENTATION_PLAN.md §5). Direct fetch, not @anthropic-ai/sdk —
@@ -32,9 +33,7 @@ export async function generatePracticeQuestion(
     body: JSON.stringify({
       model: MODELS.GENERATE,
       max_tokens: 1024,
-      system:
-        'You write one extra Class 9 practice question for a topic, grounded only in the provided ' +
-        'content and key terms. Never introduce facts outside them.',
+      system: systemPrompt,
       messages: [
         {
           role: 'user',
@@ -59,9 +58,22 @@ export async function generatePracticeQuestion(
   const toolUse = data.content.find((block) => block.type === 'tool_use' && block.name === 'record_practice_question')
   if (!toolUse) throw new Error('generatePracticeQuestion: model did not call record_practice_question')
 
+  // CLAUDE.md hard rule 2: every AI response is Zod-validated before use — strict tool use
+  // narrows the shape but doesn't replace validating it.
+  const parsed = practiceQuestionSchema.safeParse(toolUse.input)
   const pricing = MODEL_PRICING[MODELS.GENERATE]
   const costUsd = data.usage.input_tokens * pricing.input + data.usage.output_tokens * pricing.output
-  await logAiRun(db, { purpose, model: MODELS.GENERATE, promptVersion, inputTokens: data.usage.input_tokens, outputTokens: data.usage.output_tokens, costUsd, ok: true })
+  await logAiRun(db, {
+    purpose,
+    model: MODELS.GENERATE,
+    promptVersion,
+    inputTokens: data.usage.input_tokens,
+    outputTokens: data.usage.output_tokens,
+    costUsd,
+    ok: parsed.success,
+    error: parsed.success ? undefined : `schema validation failed: ${parsed.error.message}`,
+  })
+  if (!parsed.success) throw new Error(`generatePracticeQuestion: invalid response shape: ${parsed.error.message}`)
 
-  return toolUse.input as PracticeQuestion
+  return parsed.data
 }

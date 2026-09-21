@@ -14,7 +14,7 @@
     "db:migrate:local": "cd worker && wrangler d1 migrations apply DB --local",
     "db:migrate:remote": "cd worker && wrangler d1 migrations apply DB --remote",
     "db:seed:local": "cd worker && wrangler d1 execute DB --local --file=./seed.sql",
-    "test": "cd worker && vitest run",
+    "test": "cd worker && vitest run && cd ../digest && vitest run",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run build -w web",
     "deploy": "npm run build -w web && cd worker && wrangler deploy"

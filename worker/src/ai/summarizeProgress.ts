@@ -1,6 +1,7 @@
 import { MODELS, MODEL_PRICING } from 'ncert-core'
 import { logAiRun } from '../db/queries/audit.js'
 import type { Db } from '../db/client.js'
+import systemPrompt from '../prompts/v1/summarize-progress.txt'
 
 // ProgressAnalyst (IMPLEMENTATION_PLAN.md §5): "Numbers come from SQL; Claude only writes the
 // words around them." No structured output needed — free text, no forced tool use.
@@ -21,7 +22,7 @@ export async function summarizeProgress(
     body: JSON.stringify({
       model: MODELS.CLASSIFY,
       max_tokens: 300,
-      system: 'You write a short, encouraging 2-3 sentence progress summary for a teacher, based only on the numbers given. Do not invent numbers.',
+      system: systemPrompt,
       messages: [{ role: 'user', content: `Student: ${params.studentName}\n\nPer-topic mastery:\n${lines}` }],
     }),
   })

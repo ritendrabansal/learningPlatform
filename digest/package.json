@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "ncert-core": "*",
@@ -14,6 +15,7 @@
   "devDependencies": {
     "typescript": "^5",
     "tsx": "^4",
-    "@types/node": "^22"
+    "@types/node": "^22",
+    "vitest": "^4.1"
   }
 }
