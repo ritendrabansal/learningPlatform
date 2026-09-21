@@ -24,7 +24,14 @@ describe('curriculum queries (read-only)', () => {
       .returning()
     const [chapter] = await db
       .insert(chapters)
-      .values({ bookId: book!.id, number: 1, title: 'The Lost Child', pageStart: 1, pageEnd: 10 })
+      .values({
+        bookId: book!.id,
+        number: 1,
+        title: 'The Lost Child',
+        pdfR2Key: 'english/iebe101.pdf',
+        pageStart: 1,
+        pageEnd: 10,
+      })
       .returning()
 
     const result = await listChaptersForBook(db, book!.id)

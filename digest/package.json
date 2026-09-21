@@ -6,7 +6,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "ncert-core": "*"
+    "ncert-core": "*",
+    "@anthropic-ai/sdk": "^0.127",
+    "pdf-lib": "^1.17",
+    "dotenv": "^18"
   },
   "devDependencies": {
     "typescript": "^5",

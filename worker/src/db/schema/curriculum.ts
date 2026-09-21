@@ -19,7 +19,9 @@ export const books = sqliteTable(
     id: text('id').primaryKey().$defaultFn(() => newId()),
     subjectId: text('subject_id').notNull().references(() => subjects.id),
     title: text('title').notNull(),
-    pdfR2Key: text('pdf_r2_key').notNull(),
+    // Nullable: our source material is one PDF per chapter, not one PDF per book (see
+    // chapters.pdfR2Key below). Reserved for a whole-book artifact if one ever exists.
+    pdfR2Key: text('pdf_r2_key'),
     pageCount: integer('page_count'),
     // Pipeline stage tracking (P0-P9); values are set by the digest CLI as passes complete.
     // Not enumerated in IMPLEMENTATION_PLAN.md §3, so left unconstrained here rather than
@@ -42,6 +44,9 @@ export const chapters = sqliteTable(
     bookId: text('book_id').notNull().references(() => books.id),
     number: integer('number').notNull(),
     title: text('title').notNull(),
+    // Each chapter is its own distinct PDF file with its own page numbering — source_pages
+    // on topics/questions is only meaningful once you know which file it refers to.
+    pdfR2Key: text('pdf_r2_key').notNull(),
     pageStart: integer('page_start').notNull(),
     pageEnd: integer('page_end').notNull(),
     status: text('status', { enum: curriculumStatus }).notNull().default('draft'),

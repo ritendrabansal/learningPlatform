@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "ulid": "^3"
+    "ulid": "^3",
+    "zod": "^4.6"
   },
   "devDependencies": {
     "typescript": "^5"
