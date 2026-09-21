@@ -8,6 +8,8 @@ import { ChapterView } from './pages/ChapterView.js'
 import { ReviewQueue } from './pages/ReviewQueue.js'
 import { TeachMode } from './pages/TeachMode.js'
 import { StudentView } from './pages/StudentView.js'
+import { Progress } from './pages/Progress.js'
+import { Homework } from './pages/Homework.js'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -20,6 +22,8 @@ createRoot(document.getElementById('root')!).render(
           <Route path="teach" element={<TeachMode />} />
           <Route path="teach/:sessionId" element={<TeachMode />} />
           <Route path="join" element={<StudentView />} />
+          <Route path="progress" element={<Progress />} />
+          <Route path="homework" element={<Homework />} />
         </Route>
       </Routes>
     </BrowserRouter>

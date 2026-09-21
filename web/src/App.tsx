@@ -33,6 +33,8 @@ function App() {
         <NavLink to="/review">Review Queue</NavLink>
         <NavLink to="/teach">Teach Mode</NavLink>
         <NavLink to="/join">Join Class</NavLink>
+        <NavLink to="/progress">Progress</NavLink>
+        <NavLink to="/homework">Homework</NavLink>
       </nav>
       <main>
         <Outlet />

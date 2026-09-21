@@ -4,6 +4,8 @@ import { health } from './routes/health.js'
 import { library } from './routes/library.js'
 import { review } from './routes/review.js'
 import { classroom } from './routes/classroom.js'
+import { homework } from './routes/homework.js'
+import { progress } from './routes/progress.js'
 
 export { ClassroomAgent } from './agents/ClassroomAgent.js'
 export { HomeworkAgent } from './agents/HomeworkAgent.js'
@@ -14,6 +16,8 @@ app.route('/api/health', health)
 app.route('/api/library', library)
 app.route('/api/review', review)
 app.route('/api/classroom', classroom)
+app.route('/api/homework', homework)
+app.route('/api/progress', progress)
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {

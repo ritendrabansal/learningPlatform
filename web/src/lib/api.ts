@@ -134,6 +134,44 @@ export interface Session {
   endedAt: number | null
 }
 
+export interface HomeworkQuestion {
+  id: string
+  topicId: string
+  kind: 'mcq' | 'short' | 'long' | 'numeric' | 'fill' | 'match'
+  promptMd: string
+  answerMd: string | null
+}
+
+export interface HomeworkSubmission {
+  id: string
+  itemId: string
+  response: string | null
+  correct: boolean | null
+  score: number | null
+  feedback: string | null
+  submittedAt: number
+}
+
+export interface HomeworkItem {
+  item: { id: string; setId: string; questionId: string; questionTable: string; reason: string }
+  question: HomeworkQuestion | undefined
+  submission: HomeworkSubmission | null
+}
+
+export interface HomeworkSetWithItems {
+  set: { id: string; studentId: string; sessionId: string; dueAt: number; status: string }
+  items: HomeworkItem[]
+}
+
+export interface ProgressCell {
+  studentId: string
+  studentName: string
+  topicId: string
+  topicTitle: string
+  score: number
+  attempts: number
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     ...init,
@@ -174,4 +212,11 @@ export const api = {
   getClassByCode: (joinCode: string) => request<ClassByCode>(`/api/classroom/classes/${joinCode}`),
   startSession: (input: { classId: string; chapterId: string }) =>
     request<Session>('/api/classroom/sessions', { method: 'POST', body: JSON.stringify(input) }),
+
+  getHomeworkForStudent: (studentId: string) => request<HomeworkSetWithItems[]>(`/api/homework/students/${studentId}`),
+  submitHomework: (itemId: string, response: string) =>
+    request<HomeworkSubmission>(`/api/homework/items/${itemId}/submit`, { method: 'POST', body: JSON.stringify({ response }) }),
+
+  getProgressGrid: (classId: string) => request<ProgressCell[]>(`/api/progress/classes/${classId}`),
+  getProgressSummary: (studentId: string) => request<{ summary: string }>(`/api/progress/students/${studentId}/summary`),
 }

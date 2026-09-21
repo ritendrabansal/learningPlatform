@@ -33,6 +33,23 @@
   `mastery` rollup all confirmed in D1. The React UI itself (rendering, keyboard shortcuts, click
   handling) was not visually verified in an actual browser — only the underlying protocol and
   data flow, which is everything a browser session would exercise server-side.
-- [ ] Phase 7 — Progress and Homework
+- [x] Phase 7 — Progress and Homework
+  `HomeworkAgent.generateHomework` is now called by `ClassroomAgent.endSession` for every student
+  in the class roster (standard Durable Object server-to-server RPC via `getAgentByName`, not the
+  client-facing `unstable_callable` decorator). Picks weak topics (mastery < 0.7, or covered this
+  session with zero attempts and no prior mastery signal), selects unused textbook questions,
+  then approved `generated_questions`, then generates new ones with Sonnet as a last resort
+  (`worker/src/ai/generatePracticeQuestion.ts`); writes `homework_sets`/`homework_items` with a
+  human-readable `reason` on each; schedules a reminder placeholder and an overdue check via
+  `this.schedule()`. Added `/api/homework` (list + submit, reusing Phase 6's answer-scoring code)
+  and `/api/progress` (mastery heat-map grid + an on-demand Haiku-written plain-English summary,
+  `worker/src/ai/summarizeProgress.ts`) routes, plus `Progress` and `Homework` pages in `web/`.
+  Verified end-to-end against `wrangler dev`: ending a real session created homework for all 3
+  students in the roster, each item with a correct reason; a submitted answer was scored for
+  real by Haiku; the progress summary was fixed after catching a real bug in testing (it called
+  the AI even with zero mastery data, producing a confused non-answer — now short-circuits to a
+  plain "no attempts yet" message). A real bug in weak-topic detection was also caught and fixed
+  by the unit tests: a topic with solid prior mastery but no attempt *this session* was wrongly
+  flagged as weak.
 - [ ] Phase 8 — Hardening
 - [ ] Phase 9 — Deploy (run by Ritendra manually)

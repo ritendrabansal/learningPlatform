@@ -21,3 +21,8 @@ export async function createStudent(db: Db, input: { classId: string; name: stri
 export async function listStudentsForClass(db: Db, classId: string) {
   return db.select().from(students).where(eq(students.classId, classId))
 }
+
+export async function getStudent(db: Db, studentId: string) {
+  const [student] = await db.select().from(students).where(eq(students.id, studentId))
+  return student ?? null
+}

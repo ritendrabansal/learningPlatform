@@ -361,3 +361,77 @@ button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* --- Teach Mode / Student View --- */
+
+.teach-header,
+.join-roster ul {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.join-roster ul {
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+}
+.teach-shortcuts {
+  color: var(--text);
+  font-size: 13px;
+  margin-top: 24px;
+}
+.active-question,
+.answer-box {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.answer-box textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+.answer-result {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.answer-result.correct {
+  background: rgba(22, 163, 74, 0.1);
+  color: #16a34a;
+}
+.answer-result.incorrect {
+  background: rgba(220, 38, 38, 0.08);
+  color: crimson;
+}
+
+/* --- Homework / Progress --- */
+
+.homework-set {
+  margin-bottom: 32px;
+}
+.homework-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.homework-item .reason {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text);
+}
+
+.progress-grid {
+  border-collapse: collapse;
+  margin-top: 16px;
+  width: 100%;
+}
+.progress-grid th,
+.progress-grid td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: center;
+}
+.progress-grid td[style] {
+  color: white;
+}

@@ -1,10 +1,12 @@
-import { Agent, type Connection, type ConnectionContext, type WSMessage } from 'agents'
+import { Agent, getAgentByName, type Connection, type ConnectionContext, type WSMessage } from 'agents'
 import { eq } from 'drizzle-orm'
 import { studentMessageSchema, teacherMessageSchema, type AnswerResult, type ClassroomState } from 'ncert-core'
 import { getDb } from '../db/client.js'
 import { textbookQuestions } from '../db/schema/index.js'
 import { endSession, recordAttempt, recordTopicShown, rollUpMastery, setCoverageDuration } from '../db/queries/classroom.js'
+import { listStudentsForClass } from '../db/queries/people.js'
 import { scoreAnswerLocally, scoreAnswerWithAi } from '../lib/scoreAnswer.js'
+import type { HomeworkAgent } from './HomeworkAgent.js'
 
 export type { ClassroomState } from 'ncert-core'
 
@@ -114,7 +116,15 @@ export class ClassroomAgent extends Agent<Env, ClassroomState> {
           }
           await endSession(db, this.state.sessionId)
           await rollUpMastery(db, this.state.sessionId)
-          // Phase 7: trigger HomeworkAgent per enrolled student here.
+
+          if (this.state.classId) {
+            const sessionId = this.state.sessionId
+            const roster = await listStudentsForClass(db, this.state.classId)
+            for (const student of roster) {
+              const homeworkAgent = await getAgentByName<Env, HomeworkAgent>(this.env.HOMEWORK_AGENT, student.id)
+              await homeworkAgent.generateHomework({ studentId: student.id, sessionId })
+            }
+          }
         }
         break
       }
