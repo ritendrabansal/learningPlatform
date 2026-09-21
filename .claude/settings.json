@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npx wrangler d1 * --local*)",
+      "Bash(npx wrangler dev*)",
+      "Bash(npx wrangler deploy --dry-run*)",
+      "Bash(npx vitest*)",
+      "Bash(npx tsc*)",
+      "Bash(git status)",
+      "Bash(git diff*)"
+    ],
+    "deny": [
+      "Bash(npx wrangler deploy)",
+      "Bash(npx wrangler * --remote*)",
+      "Bash(npx wrangler secret*)",
+      "Read(./.dev.vars)"
+    ]
+  }
+}

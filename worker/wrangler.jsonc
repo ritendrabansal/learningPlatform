@@ -1,0 +1,38 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ncert-learning-platform",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-10-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ncert-db",
+      "database_id": "local-placeholder"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PDFS",
+      "bucket_name": "ncert-pdfs"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "CLASSROOM_AGENT", "class_name": "ClassroomAgent" },
+      { "name": "HOMEWORK_AGENT", "class_name": "HomeworkAgent" }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["ClassroomAgent", "HomeworkAgent"]
+    }
+  ],
+  "assets": {
+    "directory": "../web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/agents/*"]
+  }
+}

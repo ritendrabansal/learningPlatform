@@ -1,0 +1,1 @@
+-- Seed data added in Phase 2 (1 teacher, 1 class, 3 students — IMPLEMENTATION_PLAN.md §6 Phase 2).

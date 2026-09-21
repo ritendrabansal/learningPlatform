@@ -1,0 +1,30 @@
+{
+  "name": "ncert-learning-platform",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "worker",
+    "web",
+    "digest"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,worker -c blue,green \"npm run dev -w web\" \"npm run dev -w worker\"",
+    "digest": "tsx digest/src/cli.ts",
+    "db:migrate:local": "cd worker && wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "cd worker && wrangler d1 migrations apply DB --remote",
+    "db:seed:local": "cd worker && wrangler d1 execute DB --local --file=./seed.sql",
+    "test": "cd worker && vitest run",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build -w web",
+    "deploy": "npm run build -w web && cd worker && wrangler deploy"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "concurrently": "^9",
+    "wrangler": "^4",
+    "vitest": "^4.1",
+    "@cloudflare/vitest-plugin": "^1.2",
+    "tsx": "^4"
+  }
+}

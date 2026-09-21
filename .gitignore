@@ -1,0 +1,8 @@
+node_modules/
+.dev.vars
+.wrangler/
+content/**/*.pdf
+digest/out/
+dist/
+worker/worker-configuration.d.ts
+.DS_Store

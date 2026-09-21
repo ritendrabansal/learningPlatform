@@ -1,0 +1,24 @@
+{
+  "name": "ncert-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "hono": "^4",
+    "agents": "^0",
+    "ncert-core": "*",
+    "@modelcontextprotocol/client": "2.0.0",
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "@modelcontextprotocol/server": "2.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "wrangler": "^4",
+    "vitest": "^4.1",
+    "@cloudflare/vitest-plugin": "^1.2"
+  }
+}
