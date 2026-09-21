@@ -3,6 +3,7 @@ import { routeAgentRequest } from 'agents'
 import { health } from './routes/health.js'
 import { library } from './routes/library.js'
 import { review } from './routes/review.js'
+import { classroom } from './routes/classroom.js'
 
 export { ClassroomAgent } from './agents/ClassroomAgent.js'
 export { HomeworkAgent } from './agents/HomeworkAgent.js'
@@ -12,6 +13,7 @@ const app = new Hono<{ Bindings: Env }>()
 app.route('/api/health', health)
 app.route('/api/library', library)
 app.route('/api/review', review)
+app.route('/api/classroom', classroom)
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {

@@ -106,6 +106,34 @@ export interface ReviewQueueRow {
   openFlags: number
 }
 
+export interface ClassRow {
+  id: string
+  teacherId: string
+  name: string
+  grade: number
+  joinCode: string
+}
+
+export interface StudentRow {
+  id: string
+  classId: string
+  name: string
+}
+
+export interface ClassByCode {
+  class: ClassRow
+  students: StudentRow[]
+  activeSessionId: string | null
+}
+
+export interface Session {
+  id: string
+  classId: string
+  chapterId: string
+  startedAt: number
+  endedAt: number | null
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     ...init,
@@ -141,4 +169,9 @@ export const api = {
     request(`/api/review/questions/${questionId}`, { method: 'PATCH', body: JSON.stringify({ action: 'reject' }) }),
 
   resolveFlag: (flagId: string) => request(`/api/review/flags/${flagId}`, { method: 'PATCH' }),
+
+  listClasses: () => request<ClassRow[]>('/api/classroom/classes'),
+  getClassByCode: (joinCode: string) => request<ClassByCode>(`/api/classroom/classes/${joinCode}`),
+  startSession: (input: { classId: string; chapterId: string }) =>
+    request<Session>('/api/classroom/sessions', { method: 'POST', body: JSON.stringify(input) }),
 }

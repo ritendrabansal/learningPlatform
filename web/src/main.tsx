@@ -6,6 +6,8 @@ import App from './App.tsx'
 import { Library } from './pages/Library.js'
 import { ChapterView } from './pages/ChapterView.js'
 import { ReviewQueue } from './pages/ReviewQueue.js'
+import { TeachMode } from './pages/TeachMode.js'
+import { StudentView } from './pages/StudentView.js'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -15,6 +17,9 @@ createRoot(document.getElementById('root')!).render(
           <Route index element={<Library />} />
           <Route path="chapters/:chapterId" element={<ChapterView />} />
           <Route path="review" element={<ReviewQueue />} />
+          <Route path="teach" element={<TeachMode />} />
+          <Route path="teach/:sessionId" element={<TeachMode />} />
+          <Route path="join" element={<StudentView />} />
         </Route>
       </Routes>
     </BrowserRouter>

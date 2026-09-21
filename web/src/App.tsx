@@ -31,6 +31,8 @@ function App() {
           Library
         </NavLink>
         <NavLink to="/review">Review Queue</NavLink>
+        <NavLink to="/teach">Teach Mode</NavLink>
+        <NavLink to="/join">Join Class</NavLink>
       </nav>
       <main>
         <Outlet />
