@@ -1,32 +1,42 @@
 import { useEffect, useState } from 'react'
+import { NavLink, Outlet } from 'react-router'
 
 type HealthStatus = { db: 'ok' | 'error'; r2: 'ok' | 'error' } | null
 
-function App() {
+function HealthStatusFooter() {
   const [health, setHealth] = useState<HealthStatus>(null)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/health')
       .then((res) => res.json())
       .then(setHealth)
-      .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)))
+      .catch(() => setHealth({ db: 'error', r2: 'error' }))
   }, [])
 
+  if (!health) return null
+  const ok = health.db === 'ok' && health.r2 === 'ok'
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: '2rem', maxWidth: 640 }}>
-      <h1>NCERT Class 9 AI Learning Platform</h1>
-      <p>Phase 1 scaffold — worker, D1, R2, and Durable Object bindings are wired up.</p>
-      <h2>/api/health</h2>
-      {error && <p style={{ color: 'crimson' }}>Error: {error}</p>}
-      {!error && !health && <p>Loading...</p>}
-      {health && (
-        <ul>
-          <li>D1 (DB): {health.db}</li>
-          <li>R2 (PDFS): {health.r2}</li>
-        </ul>
-      )}
-    </main>
+    <footer className={`health-footer ${ok ? 'ok' : 'error'}`}>
+      D1: {health.db} · R2: {health.r2}
+    </footer>
+  )
+}
+
+function App() {
+  return (
+    <div className="app-shell">
+      <nav className="app-nav">
+        <span className="app-title">NCERT Class 9 AI Learning Platform</span>
+        <NavLink to="/" end>
+          Library
+        </NavLink>
+        <NavLink to="/review">Review Queue</NavLink>
+      </nav>
+      <main>
+        <Outlet />
+      </main>
+      <HealthStatusFooter />
+    </div>
   )
 }
 

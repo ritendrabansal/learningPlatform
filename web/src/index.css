@@ -109,3 +109,255 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* --- App shell (Library / Review Queue) --- */
+
+.app-shell {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.app-nav a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.app-nav a.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.app-title {
+  font-weight: 600;
+  color: var(--text-h);
+  margin-right: auto;
+}
+
+.app-shell main {
+  padding: 24px;
+  flex: 1;
+}
+
+.health-footer {
+  padding: 8px 24px;
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+  color: var(--text);
+}
+.health-footer.error {
+  color: crimson;
+}
+
+.error {
+  color: crimson;
+}
+
+/* --- Library --- */
+
+.book {
+  margin: 8px 0 20px;
+}
+
+.chapter-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.chapter-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.status-pill {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.status-pill.status-draft {
+  color: var(--text);
+}
+.status-pill.status-in_review {
+  color: var(--accent);
+  border-color: var(--accent-border);
+}
+.status-pill.status-approved {
+  color: #16a34a;
+  border-color: #16a34a;
+}
+
+/* --- Markdown content / badges --- */
+
+.markdown-content {
+  text-align: left;
+}
+
+.content-badges {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.badge-ai {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+}
+
+.badge-verified {
+  background: rgba(22, 163, 74, 0.1);
+  color: #16a34a;
+  border: 1px solid #16a34a;
+}
+
+.topic-summary {
+  font-style: italic;
+  margin-bottom: 8px;
+}
+
+.key-terms {
+  margin: 12px 0;
+}
+.key-terms dt {
+  font-weight: 600;
+  color: var(--text-h);
+}
+.key-terms dd {
+  margin: 0 0 8px;
+}
+
+.worked-example,
+.question {
+  border-left: 3px solid var(--border);
+  padding-left: 12px;
+  margin: 16px 0;
+}
+
+.exercise-label {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+/* --- Review Queue --- */
+
+.chapter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.chapter-tabs button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+.chapter-tabs button.active {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+.chapter-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.review-item {
+  display: grid;
+  grid-template-columns: minmax(200px, 320px) 1fr;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.review-item.flagged {
+  background: rgba(220, 38, 38, 0.04);
+}
+
+@media (max-width: 800px) {
+  .review-item {
+    grid-template-columns: 1fr;
+  }
+}
+
+.review-item-source {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pdf-page {
+  max-width: 100%;
+  border: 1px solid var(--border);
+}
+
+.pdf-page-error {
+  font-size: 13px;
+  color: crimson;
+}
+
+.flag-banner {
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.recomputed {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.review-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.review-actions button {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.review-item-content textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--mono);
+  margin-bottom: 8px;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

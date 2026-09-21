@@ -1,0 +1,144 @@
+// Thin typed fetch wrapper for the Worker's /api/library and /api/review routes
+// (worker/src/routes/library.ts, worker/src/routes/review.ts). Shapes mirror those routes'
+// JSON output exactly — kept here rather than shared with worker/ since the two packages don't
+// otherwise share types and this is a small, stable surface.
+
+export interface LibraryChapter {
+  id: string
+  number: number
+  title: string
+  status: 'draft' | 'in_review' | 'approved'
+}
+
+export interface LibraryBook {
+  id: string
+  title: string
+  chapters: LibraryChapter[]
+}
+
+export interface LibrarySubject {
+  id: string
+  name: string
+  grade: number
+  books: LibraryBook[]
+}
+
+export interface KeyTerm {
+  id: string
+  topicId: string
+  term: string
+  meaning: string
+}
+
+export interface WorkedExample {
+  id: string
+  topicId: string
+  promptMd: string
+  solutionMd: string
+  sourcePages: number[]
+}
+
+export interface TextbookQuestion {
+  id: string
+  topicId: string
+  kind: 'mcq' | 'short' | 'long' | 'numeric' | 'fill' | 'match'
+  promptMd: string
+  answerMd: string | null
+  answerSource: 'textbook' | 'ai_worked'
+  difficulty: string | null
+  sourcePages: number[]
+  verified: boolean
+  exerciseLabel: string | null
+  exerciseOrderIndex: number | null
+}
+
+export interface Topic {
+  id: string
+  chapterId: string
+  orderIndex: number
+  title: string
+  summary: string | null
+  contentMd: string
+  sourcePages: number[]
+  status: 'draft' | 'in_review' | 'approved'
+  keyTerms: KeyTerm[]
+  workedExamples: WorkedExample[]
+  questions: TextbookQuestion[]
+}
+
+export interface Chapter {
+  id: string
+  bookId: string
+  number: number
+  title: string
+  pdfR2Key: string
+  pageStart: number
+  pageEnd: number
+  status: 'draft' | 'in_review' | 'approved'
+}
+
+export interface ChapterDetail {
+  chapter: Chapter
+  topics: Topic[]
+}
+
+export interface ReviewFlag {
+  id: string
+  chapterId: string
+  itemType: 'topic' | 'textbook_question' | 'worked_example'
+  itemId: string
+  pass: 'P2' | 'P3' | 'P4'
+  issue: string
+  recomputed: { expected: string; computed: string } | null
+  resolved: boolean
+  createdAt: number
+}
+
+export interface ReviewChapterDetail extends ChapterDetail {
+  flags: ReviewFlag[]
+}
+
+export interface ReviewQueueRow {
+  chapterId: string
+  chapterNumber: number
+  chapterTitle: string
+  chapterStatus: 'draft' | 'in_review' | 'approved'
+  openFlags: number
+}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(path, {
+    ...init,
+    headers: { 'content-type': 'application/json', ...init?.headers },
+  })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`${init?.method ?? 'GET'} ${path} failed: ${res.status} ${body}`)
+  }
+  return res.json() as Promise<T>
+}
+
+export const api = {
+  getLibrary: () => request<LibrarySubject[]>('/api/library'),
+  getChapter: (chapterId: string) => request<ChapterDetail>(`/api/library/chapters/${chapterId}`),
+  chapterPdfUrl: (chapterId: string) => `/api/library/chapters/${chapterId}/pdf`,
+
+  getReviewQueue: () => request<ReviewQueueRow[]>('/api/review/queue'),
+  getReviewChapter: (chapterId: string) => request<ReviewChapterDetail>(`/api/review/chapters/${chapterId}`),
+  approveChapter: (chapterId: string) => request(`/api/review/chapters/${chapterId}/approve`, { method: 'POST' }),
+
+  approveTopic: (topicId: string, patch: { title?: string; summary?: string | null; contentMd?: string } = {}) =>
+    request(`/api/review/topics/${topicId}`, { method: 'PATCH', body: JSON.stringify({ action: 'approve', ...patch }) }),
+  editTopic: (topicId: string, patch: { title?: string; summary?: string | null; contentMd?: string }) =>
+    request(`/api/review/topics/${topicId}`, { method: 'PATCH', body: JSON.stringify({ action: 'edit', ...patch }) }),
+  rejectTopic: (topicId: string) => request(`/api/review/topics/${topicId}`, { method: 'PATCH', body: JSON.stringify({ action: 'reject' }) }),
+
+  approveQuestion: (questionId: string, patch: { promptMd?: string; answerMd?: string | null; difficulty?: string | null } = {}) =>
+    request(`/api/review/questions/${questionId}`, { method: 'PATCH', body: JSON.stringify({ action: 'approve', ...patch }) }),
+  editQuestion: (questionId: string, patch: { promptMd?: string; answerMd?: string | null; difficulty?: string | null }) =>
+    request(`/api/review/questions/${questionId}`, { method: 'PATCH', body: JSON.stringify({ action: 'edit', ...patch }) }),
+  rejectQuestion: (questionId: string) =>
+    request(`/api/review/questions/${questionId}`, { method: 'PATCH', body: JSON.stringify({ action: 'reject' }) }),
+
+  resolveFlag: (flagId: string) => request(`/api/review/flags/${flagId}`, { method: 'PATCH' }),
+}
